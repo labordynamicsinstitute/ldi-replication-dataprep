@@ -10,10 +10,11 @@ basepath <- rprojroot::find_rstudio_root_file()
 dataloc <- file.path(basepath, "data","replication_data")
 interwrk <- file.path(basepath, "data","interwrk")
 Outputs <- file.path(basepath, "data","outputs" )
+confidential <- file.path(basepath,"data","confidential")
 
 programs <- file.path(basepath,"programs")
 
-for ( dir in list(dataloc,interwrk,Outputs)){
+for ( dir in list(dataloc,interwrk,Outputs,confidential)){
 	if (file.exists(dir)){
 	} else {
 	dir.create(file.path(dir))

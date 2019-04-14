@@ -1,0 +1,110 @@
+---
+title: "Programs"
+author: 
+  1:
+    name: "Lars Vilhuber"
+  2:
+    name: "Flavio Stancchi"
+  3:
+    name: "Hautahi Kingi"
+  4:
+    name: "Sylverie Herbert"
+date: "`r Sys.Date()`"
+output: 
+  html_document: 
+    keep_md: yes
+    number_sections: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+# Programs
+
+Programs are split into three parts:
+
+## Data preparation
+The original data are collected through a Google Form, and are thus stored on a Google Sheet. They do contain personal identifiers which we wish to hide, and the site requires authentication. The first set of programs thus
+- download from Google (snapshot)
+- anonymize the data
+- upload the data a permanent location (Zenodo) (not functional yet)
+
+In general, these programs can only be run by project members with access to the Google Sheet.
+
+
+
+## Setup
+
+We rely on the R packages `rprojroot` and `checkpoint` - if you do not have those, you need to install them. All other packages are installed automatically.
+
+Most parameters are set in the `config.R`:
+```{r setup_config}
+source(file.path(rprojroot::find_rstudio_root_file(),"pathconfig.R"),echo=TRUE)
+source(file.path(programs,"config.R"), echo=TRUE)
+# private config - not part of REPO! See private repo labordynamicsinstitute/aej-applied-replications/programs/config-private.R and copy manually into this directory
+source(file.path(programs,"config-private.R"), echo=FALSE)
+```
+
+Note that the path `interwrk` is transitory, and is only kept during processing. It will be empty in the replication archive.
+
+Any libraries needed are called and if necessary installed through `libraries.R`:
+
+```{r setup_libraries}
+source(file.path(basepath,"global-libraries.R"),echo=TRUE)
+source(file.path(programs,"libraries.R"), echo=TRUE)
+```
+
+These sections are included in all relevant programs, and configure the programs to run almost everywhere (tested on Linux and Mac OS).
+
+
+
+## Download the replication data from Google Sheet
+The responses to the replication attempts are stored on Google Sheets. We download, then combine and clean the data. This can only be executed by the project owners.
+
+ - Input data: On Google Sheets (private)
+ - Output data: path `interwrk',"repllist2.Rds"
+ 
+```{r download_replication,eval=FALSE,cache=TRUE}
+source(file.path(programs,"01_download_replication.R"),echo=TRUE)
+```
+
+At the end of this step, the `interwrk` directory  should have the following data files:
+
+- entryQ.{Rds,csv} - the main data from the "Entry" questionnaire (assessment)
+- exitQ.{Rds,csv} - the main data from the post-replication "Exit" questionnaire (assessment)
+- entryQ2011.{Rds,csv} - data from the experiment with 2011 publications, prior to a uniform questionnaire (experimental data)
+- mapping_ws_nums.Rds - a mapping of numbers to sheet names in the assignment
+- replication_list_{n}.{Rds,csv} - individual tabs from the assignment spreadsheet. Until 2018, each batch of replicators was assigned jobs in a separate tab of the master spreadsheet. After 2018, only a single tab was updated going forward.
+
+The next program consolidates these files.
+
+```{r read_clean_list,cache=TRUE,eval=FALSE}
+source(file.path(programs,"02_read_clean_replicationlist.R"),echo=TRUE)
+```
+
+At the end of this program, a dataset `repllist2.Rds` should be present in `interwrk`, containing consolidated data.
+
+## Anonymize the data
+The Google Sheet data contains the actual login ID or name of the replicators. We anonymize them. This can only be executed by the project owners.
+
+ - Input data: path `interwrk`
+ - Output data: path `dataloc`
+ 
+```{r anonymize_replication,eval=FALSE,cache=TRUE}
+source(file.path(programs,"03_gen_anonymous_ID.R"),echo=TRUE)
+```
+
+## Prepare for upload to Zenodo
+
+In order to upload, we 
+
+- verify that no names are contained in the relevant columns anymore
+- create a rudimentary codebook
+
+The upload itself at this time is manual.
+
+## Processing info
+```{r}
+Sys.info()
+```
+

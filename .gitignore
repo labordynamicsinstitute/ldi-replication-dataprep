@@ -1,0 +1,10 @@
+config-private.R
+*run.xml
+*gz
+*.aux
+*.log
+cache
+.Rhistory
+.DS_Store
+.Rproj.user
+.httr-oauth

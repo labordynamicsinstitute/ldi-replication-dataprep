@@ -9,7 +9,9 @@ This prepares and cleans the raw data from the LDI Replication Lab. The output i
 > Hautahi Kingi, Sylverie Herbert, Flavio Stanchi, & Vilhuber, Lars. (2019). Data from the Cornell LDI Replication Lab (Version v20190414) [Data set]. Zenodo. http://doi.org/10.5281/zenodo.2639919
 
 ## Code Archive
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.26413087.svg)](https://doi.org/10.5281/zenodo.26413087) - Always points to the latest code release version
 
+> Hautahi Kingi, Sylverie Herbert, Flavio Stanchi, & Lars Vilhuber. (2019, April 14). labordynamicsinstitute/ldi-replication-dataprep: LDI Replication Lab Data Preparation (Version v20190414). Zenodo. http://doi.org/10.5281/zenodo.2641308
 
 ## Structure
 

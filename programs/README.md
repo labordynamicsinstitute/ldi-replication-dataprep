@@ -4,7 +4,7 @@ author:
   1:
     name: "Lars Vilhuber"
   2:
-    name: "Flavio Stancchi"
+    name: "Flavio Stanchi"
   3:
     name: "Hautahi Kingi"
   4:
@@ -733,7 +733,7 @@ write.csv(tmp_repllist, file = file.path(Outputs,"replication_list_pub.csv"))
 metadata <- data.frame(schema="dc.terms")
 metadata$dc.identifier <- "10.5281/zenodo.2639920"
 metadata$dc.title <- "Data from the Cornell LDI Replication Lab"
-metadata$dc.creator <- "Hautahi Kingi and Sylverie Herbert and Flavio Stancchi and Lars Vilhuber"
+metadata$dc.creator <- "Hautahi Kingi and Sylverie Herbert and Flavio Stanchi and Lars Vilhuber"
 metadata$dc.date <- as.character(as.Date.character(Sys.Date()))
 metadata$last.update <- as.character(as.Date.character(Sys.Date()))
 metadata$last.modified.by <- Sys.info()["user"]
@@ -761,17 +761,17 @@ knitr::kable(metadata)
 
 
 
-key                value                                                                    
------------------  -------------------------------------------------------------------------
-schema             dc.terms                                                                 
-dc.identifier      10.5281/zenodo.2639920                                                   
-dc.title           Data from the Cornell LDI Replication Lab                                
-dc.creator         Hautahi Kingi and Sylverie Herbert and Flavio Stancchi and Lars Vilhuber 
-dc.date            2019-04-14                                                               
-last.update        2019-04-14                                                               
-last.modified.by   vilhuber                                                                 
-dc.relation        https://github.com/labordynamicsinstitute/ldi-replication-dataprep       
-dc.type            data                                                                     
+key                value                                                                   
+-----------------  ------------------------------------------------------------------------
+schema             dc.terms                                                                
+dc.identifier      10.5281/zenodo.2639920                                                  
+dc.title           Data from the Cornell LDI Replication Lab                               
+dc.creator         Hautahi Kingi and Sylverie Herbert and Flavio Stanchi and Lars Vilhuber 
+dc.date            2019-04-14                                                              
+last.update        2019-04-14                                                              
+last.modified.by   vilhuber                                                                
+dc.relation        https://github.com/labordynamicsinstitute/ldi-replication-dataprep      
+dc.type            data                                                                    
 
 
 The upload itself at this time is manual.

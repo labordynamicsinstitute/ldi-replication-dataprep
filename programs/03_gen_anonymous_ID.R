@@ -8,7 +8,8 @@ exitQ <- readRDS(file = file.path(interwrk,"exitQ.Rds"))
 
 # Compile a list of NetID, names, across the three datasets
 repllistnames <- tmp_repllist %>%
-  select(DOI,assessor, Replicator1 , Replicator2 ,worksheet) 
+  select(DOI,assessor, Replicator1 , Replicator2 ,worksheet) %>%
+	filter(!(is.na(assessor) & is.na(Replicator1) & is.na(Replicator2)))
 
 # Merge the two entry questionnaires list of NetID-DOI
 entryQ2011.names <- entryQ2011 %>%
@@ -23,13 +24,15 @@ entryQnames_complete <- rbind(entryQ.names,entryQ2011.names)
 setnames(exitQ,"NetID or email","NetID",skip_absent = TRUE)
 
 # Create data set to flag people who use alternatively name or netID in the replication list
-candidates <- merge(x = repllistnames, y = entryQnames_complete, by = "DOI", all = TRUE)
+candidates <- merge(x = repllistnames, y = entryQnames_complete, by = "DOI", all = TRUE) %>% filter(!is.na(worksheet))
 write.csv(candidates, file = file.path(interwrk,"maplist_entry.csv"))
 
 ### We reviewed the list of candidates to find the mapping, and added any manual ones
 ### Names are mapped to NETIDs
 ### 
-mapping_nametoID <-read.csv(file.path(dataloc,"mapping_name_ID.csv")) %>% select(Name,NetID)
+mapping_nametoID <-read.csv(file.path(confidential,"mapping_name_ID.csv")) %>% 
+	select(Name,NetID) %>% mutate(Name=gsub(" $","",Name))
+
 
 
 # Generate anonymous ID for each NETID in entry questionnaire
@@ -40,64 +43,60 @@ anonymise <- function(data, cols_to_mask, algo = "sha256")
 	unname(apply(to_anon, 1, digest, algo = algo))
 }
 
-entryQnames_complete$ID <- anonymise(entryQnames_complete, c("NetID"))
-exitQ$ID <- anonymise(exitQ,c("NetID"))
+entryQnames_list <- unique(entryQnames_complete[,c("NetID")])
+entryQnames_list$ID <- anonymise(entryQnames_list, c("NetID"))
+
+
 
 #============================================
 # Rewrite the data with anonymous ID
 # ===========================================
+# we anonymize the original data directly, since they only contain NetIDs
+entryQ$ID <- anonymise(entryQ,c("NetID"))
+exitQ$ID <- anonymise(exitQ,c("NetID"))
 
+mapping_nametoID$ID <- anonymise(mapping_nametoID,c("NetID"))
 
-entryQnames_list <-subset(entryQnames_complete,select=c("NetID","ID"))
-entryQnames_list <- unique(entryQnames_list)
 
 # bring in the generated ID (I verified and exit and entry only have NetID to my knowledge)
-entryQ <-merge(x = entryQ_combined, y = entryQnames_list, by = "NetID")
-exitQ <- merge(x= exitQ, y=entryQnames_list, by= "NetID",all.x=TRUE)
+test.entryQ <- entryQ %>% 	filter(is.na(ID) & !is.na(NetID))
 
-# Rewrite and replace the data set without NetID
-entryQ <-subset(entryQ,select=-c(NetID))
-exitQ <-subset(exitQ,select=-c(NetID))
-
+test.exitQ<- exitQ %>% 	filter(is.na(ID) & !is.na(NetID))
 
 #====================================================================
 # Same exercise for the replication list Replicator 1 and Replicator 2
 
-tmp_repllist$Replicator1a <- mapping_nametoID$ID[match(tmp_repllist$Replicator1,mapping_nametoID$NetID)]
-tmp_repllist$Replicator1b <- mapping_nametoID$ID[match(tmp_repllist$Replicator1,mapping_nametoID$Name)]
-tmp_repllist$Replicator1c <- entryQnames_complete$ID[match(tmp_repllist$Replicator1,entryQnames_complete$NetID)]
-tmp_repllist$Replicator2a <- mapping_nametoID$ID[match(tmp_repllist$Replicator2,mapping_nametoID$NetID)]
-tmp_repllist$Replicator2b <- mapping_nametoID$ID[match(tmp_repllist$Replicator2,mapping_nametoID$Name)]
-tmp_repllist$Replicator2c <- entryQnames_complete$ID[match(tmp_repllist$Replicator2,entryQnames_complete$NetID)]
+tmp_repllist$Replicator1a <- as.character(mapping_nametoID$ID[match(tmp_repllist$Replicator1,mapping_nametoID$NetID)])
+tmp_repllist$Replicator1b <- as.character(mapping_nametoID$ID[match(tmp_repllist$Replicator1,mapping_nametoID$Name)])
+tmp_repllist$Replicator1c <- as.character(entryQnames_list$ID[match(tmp_repllist$Replicator1,entryQnames_list$NetID)])
+tmp_repllist$Replicator1_anon <-pmax(tmp_repllist$Replicator1a, tmp_repllist$Replicator1b,tmp_repllist$Replicator1c,na.rm = TRUE)
 
+tmp_repllist$Replicator2a <- as.character(mapping_nametoID$ID[match(tmp_repllist$Replicator2,mapping_nametoID$NetID)])
+tmp_repllist$Replicator2b <- as.character(mapping_nametoID$ID[match(tmp_repllist$Replicator2,mapping_nametoID$Name)])
+tmp_repllist$Replicator2c <- as.character(entryQnames_list$ID[match(tmp_repllist$Replicator2,entryQnames_list$NetID)])
+tmp_repllist$Replicator2_anon <-pmax(tmp_repllist$Replicator2a, tmp_repllist$Replicator2b,tmp_repllist$Replicator2c,na.rm = TRUE)
 
-tmp_repllist$Replicator1a <- as.character(tmp_repllist$Replicator1a)
-tmp_repllist$Replicator1b <- as.character(tmp_repllist$Replicator1b)
-tmp_repllist$Replicator2a <- as.character(tmp_repllist$Replicator2a)
-tmp_repllist$Replicator2b <- as.character(tmp_repllist$Replicator2b)
+tmp_repllist$assessora <- as.character(mapping_nametoID$ID[match(tmp_repllist$assessor,mapping_nametoID$NetID)])
+tmp_repllist$assessorb <- as.character(mapping_nametoID$ID[match(tmp_repllist$assessor,mapping_nametoID$Name)])
+tmp_repllist$assessorc <- as.character(entryQnames_list$ID[match(tmp_repllist$assessor,entryQnames_list$NetID)])
+tmp_repllist$assessor_anon <-pmax(tmp_repllist$assessora, tmp_repllist$assessorb,tmp_repllist$Replicator2c,na.rm = TRUE)
 
-tmp_repllist$Replicator1a <- ifelse(is.na(tmp_repllist$Replicator1a), "", tmp_repllist$Replicator1a)
-tmp_repllist$Replicator1b <- ifelse(is.na(tmp_repllist$Replicator1b), "", tmp_repllist$Replicator1b)
-tmp_repllist$Replicator1c <- ifelse(is.na(tmp_repllist$Replicator1c), "", tmp_repllist$Replicator1c)
-tmp_repllist$Replicator2a <- ifelse(is.na(tmp_repllist$Replicator2a), "", tmp_repllist$Replicator2a)
-tmp_repllist$Replicator2b <- ifelse(is.na(tmp_repllist$Replicator2b), "", tmp_repllist$Replicator2b)
-tmp_repllist$Replicator2c <- ifelse(is.na(tmp_repllist$Replicator2c), "", tmp_repllist$Replicator2c)
+#######################################
+# Test that there are no missed fields
 
-tmp_repllist$Replicator1 <- with(tmp_repllist, paste0(tmp_repllist$Replicator1a, tmp_repllist$Replicator1b, tmp_repllist$Replicator1c))
-tmp_repllist$Replicator1 <-pmax(tmp_repllist$Replicator1a, tmp_repllist$Replicator1b,tmp_repllist$Replicator1c)
-tmp_repllist$Replicator2 <- with(tmp_repllist, paste0(tmp_repllist$Replicator2a, tmp_repllist$Replicator2b, tmp_repllist$Replicator2c))
-tmp_repllist$Replicator2 <-pmax(tmp_repllist$Replicator2a, tmp_repllist$Replicator2b,tmp_repllist$Replicator2c)
+test.repllist.var1 <- tmp_repllist %>% 	filter(is.na(Replicator1_anon) & !is.na(Replicator1))
+test.repllist.var2 <- tmp_repllist %>% 	filter(is.na(Replicator2_anon) & !is.na(Replicator2))
+test.repllist.var3 <- tmp_repllist %>% 	filter(is.na(assessor_anon) & !is.na(assessor))
 
-# Save in permanent location
-saveRDS(entryQ,file=file.path(dataloc,"entryQ.Rds"))
-write.csv(entryQ, file = file.path(dataloc,"entryQ.csv"))
+# EAch test file should have zero obs
+# 
+nrow(test.entryQ)
+nrow(test.exitQ)
+nrow(test.repllist.var1)
+nrow(test.repllist.var2)
+nrow(test.repllist.var3)
 
-saveRDS(exitQ,file = file.path(dataloc,"exitQ.Rds"))
-write.csv(exitQ, file = file.path(dataloc,"exitQ.csv"))
-
-saveRDS(tmp_repllist, file = file.path(dataloc,"replication_list.Rds"))
-write.csv(tmp_repllist, file = file.path(dataloc,"replication_list.csv"))
-
-
+# Remove the original and temporary variables
+tmp_repllist <- tmp_repllist %>% select(-starts_with("assessor"),-starts_with("Replicator"),ends_with("_anon"))
 
 

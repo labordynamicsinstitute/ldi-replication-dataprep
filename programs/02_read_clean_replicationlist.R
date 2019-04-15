@@ -70,6 +70,9 @@ for ( x in 1:length(ws) ) {
     		tmp$`Data URL` = ""
     		tmp$`Data Contact` = ""
     	}
+    	if ( ws[x] == "Spring2017" |  ws[x] == "Spring2016"  ) {
+    		tmp <- mutate(tmp,`2nd Replicator`=ifelse(`2nd Replicator` %in% c("Y","N"),NA,`2nd Replicator`))
+    	}
     	# keep only relevant vars
     	tmp <- myfilter(tmp)
       # Add to master dataframe

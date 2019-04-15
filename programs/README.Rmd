@@ -9,7 +9,7 @@ author:
     name: "Hautahi Kingi"
   4:
     name: "Sylverie Herbert"
-date: "`r Sys.Date()`"
+date: "**`r Sys.Date()`"
 output: 
   html_document: 
     keep_md: yes
@@ -35,7 +35,7 @@ In general, these programs can only be run by project members with access to the
 
 ## Setup
 
-We rely on the R packages `rprojroot` and `checkpoint` - if you do not have those, you need to install them. All other packages are installed automatically.
+We rely on the R packages **`rprojroot` and `checkpoint` - if you do not have those, you need to install them. All other packages are installed automatically.
 
 Most parameters are set in the `config.R`:
 ```{r setup_config}
@@ -78,11 +78,34 @@ At the end of this step, the `interwrk` directory  should have the following dat
 
 The next program consolidates these files.
 
-```{r read_clean_list,cache=TRUE,eval=FALSE}
+```{r read_clean_list,cache=FALSE,eval=TRUE}
 source(file.path(programs,"02_read_clean_replicationlist.R"),echo=TRUE)
 ```
 
-At the end of this program, a dataset `repllist2.Rds` should be present in `interwrk`, containing consolidated data.
+At the end of this program, a dataset **`repllist2.Rds` should be present in `interwrk`, containing consolidated data.
+
+### Some diagnostics
+
+```{r diag2,echo=FALSE,cache=FALSE}
+# Some diagnostics
+#knitr::kable(table(repllist2$`Entry Questionnaire Author`,repllist2$`Source Title`))
+
+summary(repllist2)
+
+knitr::kable(table(repllist2$`worksheet`,repllist2$`Entry Questionnaire`,useNA = "always"))
+
+```
+
+We cannot tabulate here by journal, since that information is embedded in the DOI, which we will parse separately.
+
+```{r diag3,echo=FALSE,cache=FALSE}
+# Some diagnostics
+
+
+knitr::kable(table(tolower(repllist2$Completed1),useNA = "always"))
+
+
+```
 
 ## Anonymize the data
 The Google Sheet data contains the actual login ID or name of the replicators. We anonymize them. This can only be executed by the project owners.
@@ -90,16 +113,55 @@ The Google Sheet data contains the actual login ID or name of the replicators. W
  - Input data: path `interwrk`
  - Output data: path `dataloc`
  
-```{r anonymize_replication,eval=FALSE,cache=TRUE}
+```{r anonymize_replication,eval=TRUE,cache=FALSE}
 source(file.path(programs,"03_gen_anonymous_ID.R"),echo=TRUE)
 ```
+
+
+
+
+### Sanity Checks
+
+Anonymized IDs should be present when a non-anonymous ID is present:
+
+ - Entry questionnaire: **`r if (nrow(test.entryQ)==0) { "OK" } else { "ERROR" }`**
+ - Exit questionnaire: **`r if (nrow(test.exitQ)==0) { "OK"} else { "ERROR" }`**
+ - Replication Assignment List, Var1: **`r if (nrow(test.repllist.var1)==0) { "OK"} else { "ERROR" }`**
+ - Replication Assignment List, Var2: **`r if (nrow(test.repllist.var2)==0) { "OK"} else { "ERROR" }`**
+ - Replication Assignment List, Var3: **`r if (nrow(test.repllist.var3)==0) { "OK"} else { "ERROR" }`**
+
 
 ## Prepare for upload to Zenodo
 
 In order to upload, we 
 
-- verify that no names are contained in the relevant columns anymore
+- strip the non-anonymous ID variable
+verify that no names are contained in the relevant columns anymore
 - create a rudimentary codebook
+
+```{r save_files}
+# Rewrite and replace the data set without NetID
+entryQ <- select(entryQ,ID,everything(),-c(NetID))
+exitQ <-select(exitQ,ID,everything(),-c(NetID))
+# this is already done
+#tmp_repllist <- select(tmp_repllist,select=-assessor,-Replicator1,-Replicator2)
+
+# Save in permanent location
+knitr::kable(names(entryQ),caption = "Names on EntryQ data")
+saveRDS(entryQ,,file=file.path(Outputs,"entryQ_pub.Rds"))
+write.csv(entryQ, file = file.path(Outputs,"entryQ_pub.csv"))
+
+knitr::kable(names(exitQ),caption = "Names on ExitQ data")
+saveRDS(exitQ,file = file.path(Outputs,"exitQ_pub.Rds"))
+write.csv(exitQ, file = file.path(Outputs,"exitQ_pub.csv"))
+
+knitr::kable(names(tmp_repllist),caption = "Names on Replication Assignment List data")
+saveRDS(tmp_repllist, file = file.path(Outputs,"replication_list_pub.Rds"))
+write.csv(tmp_repllist, file = file.path(Outputs,"replication_list_pub.csv"))
+
+
+```
+
 
 The upload itself at this time is manual.
 

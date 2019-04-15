@@ -19,8 +19,11 @@ gs_ws_ls(entryQ2011.gs)
 
 
 # Extract Entry Questionnaire and tidy
-entryQ <- entryQ.gs %>% gs_read(ws = "Form Responses 1")
+entryQ <- entryQ.gs %>% gs_read(ws = "Form Responses 1") %>%
+	select(-`[Row 1]`,-starts_with("X6"))
 names(entryQ) <- sub("\\?","",names(entryQ))
+setnames(entryQ,"X94","InputDataMoreThanOne")
+
 
 entryQ2011 <- entryQ2011.gs %>% gs_read(ws = "Form Responses 1")
 names(entryQ2011) <- sub("\\?","",names(entryQ2011))
@@ -71,8 +74,12 @@ exitQ.gs <- gs_key(exit_KEY)
 gs_ws_ls(exitQ.gs)
 
 # Extract Exit Questionnaire and tidy (This should now work after changing permissions)
-exitQ  <- exitQ.gs  %>% gs_read(ws = "Form Responses 1")
+exitQ  <- exitQ.gs  %>% gs_read(ws = "Form Responses 1") %>%
+	select(-X10,-X11)
 names(exitQ) <- sub("\\?","",names(exitQ))
+setnames(exitQ,"X18","README_Quality")
+setnames(exitQ,"X19","README_Comments")
+
 
 # Save
 saveRDS(exitQ,file = file.path(interwrk,"exitQ.Rds"))

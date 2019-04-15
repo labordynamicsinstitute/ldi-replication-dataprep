@@ -2,6 +2,15 @@
 
 This prepares and cleans the raw data from the LDI Replication Lab. The output is manually curated on Zenodo, and used for downstream analysis.
 
+## Data Citation
+
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.2639919.svg)](https://doi.org/10.5281/zenodo.2639919) - Always points to the latest version
+
+> Hautahi Kingi, Sylverie Herbert, Flavio Stanchi, & Vilhuber, Lars. (2019). Data from the Cornell LDI Replication Lab (Version v20190414) [Data set]. Zenodo. http://doi.org/10.5281/zenodo.2639919
+
+## Code Archive
+
+
 ## Structure
 
 - [data](data/) contains the data

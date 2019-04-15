@@ -727,7 +727,51 @@ Table: Names on Replication Assignment List data
 ```r
 saveRDS(tmp_repllist, file = file.path(Outputs,"replication_list_pub.Rds"))
 write.csv(tmp_repllist, file = file.path(Outputs,"replication_list_pub.csv"))
+
+# write metadata
+
+metadata <- data.frame(schema="dc.terms")
+metadata$dc.identifier <- "10.5281/zenodo.2639920"
+metadata$dc.title <- "Data from the Cornell LDI Replication Lab"
+metadata$dc.creator <- "Hautahi Kingi and Sylverie Herbert and Flavio Stancchi and Lars Vilhuber"
+metadata$dc.date <- as.character(as.Date.character(Sys.Date()))
+metadata$last.update <- as.character(as.Date.character(Sys.Date()))
+metadata$last.modified.by <- Sys.info()["user"]
+metadata$dc.relation <- gsub("git@","https://",gsub(":","/",gsub("\\.git","",git_remotes()$origin)))
 ```
+
+```
+## ✔ Setting active project to '/mnt/local/slow_home/vilhuber/Workspace-non-encrypted/git/LDI/ldi-replication-dataprep'
+```
+
+```r
+metadata$dc.type <- "data"
+metadata <- gather(metadata)
+```
+
+```
+## Warning: attributes are not identical across measure variables;
+## they will be dropped
+```
+
+```r
+write.csv(metadata, file = file.path(Outputs,"metadata.csv"),row.names = FALSE)
+knitr::kable(metadata)
+```
+
+
+
+key                value                                                                    
+-----------------  -------------------------------------------------------------------------
+schema             dc.terms                                                                 
+dc.identifier      10.5281/zenodo.2639920                                                   
+dc.title           Data from the Cornell LDI Replication Lab                                
+dc.creator         Hautahi Kingi and Sylverie Herbert and Flavio Stancchi and Lars Vilhuber 
+dc.date            2019-04-14                                                               
+last.update        2019-04-14                                                               
+last.modified.by   vilhuber                                                                 
+dc.relation        https://github.com/labordynamicsinstitute/ldi-replication-dataprep       
+dc.type            data                                                                     
 
 
 The upload itself at this time is manual.

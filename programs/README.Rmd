@@ -159,7 +159,20 @@ knitr::kable(names(tmp_repllist),caption = "Names on Replication Assignment List
 saveRDS(tmp_repllist, file = file.path(Outputs,"replication_list_pub.Rds"))
 write.csv(tmp_repllist, file = file.path(Outputs,"replication_list_pub.csv"))
 
+# write metadata
 
+metadata <- data.frame(schema="dc.terms")
+metadata$dc.identifier <- "10.5281/zenodo.2639920"
+metadata$dc.title <- "Data from the Cornell LDI Replication Lab"
+metadata$dc.creator <- "Hautahi Kingi and Sylverie Herbert and Flavio Stancchi and Lars Vilhuber"
+metadata$dc.date <- as.character(as.Date.character(Sys.Date()))
+metadata$last.update <- as.character(as.Date.character(Sys.Date()))
+metadata$last.modified.by <- Sys.info()["user"]
+metadata$dc.relation <- gsub("git@","https://",gsub(":","/",gsub("\\.git","",git_remotes()$origin)))
+metadata$dc.type <- "data"
+metadata <- gather(metadata)
+write.csv(metadata, file = file.path(Outputs,"metadata.csv"),row.names = FALSE)
+knitr::kable(metadata)
 ```
 
 
